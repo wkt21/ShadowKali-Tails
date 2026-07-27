@@ -3,6 +3,7 @@
 **Tails-inspired amnesic Kali Linux live system**  
 *by Wkt12*
 
+<img width="1536" height="1024" alt="IMG_5570" src="https://github.com/user-attachments/assets/6ba5da7c-1c8d-4ad4-b92f-6e1cb0ca2fee" />
 
 
 ShadowKali-Tails is a hardened live-build variant of Kali Linux that implements the core security model of Tails:
