@@ -1,0 +1,7 @@
+#!/bin/bash
+set -euo pipefail
+
+# Ensure base directories exist and basic permissions
+mkdir -p /var/lib/tor
+mkdir -p /run/tor
+chown debian-tor:debian-tor /var/lib/tor /run/tor || true

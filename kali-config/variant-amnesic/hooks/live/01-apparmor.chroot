@@ -1,0 +1,10 @@
+#!/bin/bash
+set -euo pipefail
+
+# Enable AppArmor
+systemctl enable apparmor || true
+
+# Ensure profiles are loaded (live systems may need extra care)
+if command -v aa-enforce >/dev/null; then
+    aa-enforce /etc/apparmor.d/* || true
+fi

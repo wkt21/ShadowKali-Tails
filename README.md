@@ -3,9 +3,6 @@
 **Tails-inspired amnesic Kali Linux live system**  
 *by Wkt12*
 
-<img width="1536" height="1024" alt="IMG_5570" src="https://github.com/user-attachments/assets/6ba5da7c-1c8d-4ad4-b92f-6e1cb0ca2fee" />
-
-
 ShadowKali-Tails is a hardened live-build variant of Kali Linux that implements the core security model of Tails:
 
 1. **Amnesic operation** – no persistent writes by default (everything in RAM)
@@ -30,7 +27,59 @@ cd kali-live
 cp -a /path/to/ShadowKali-Tails/kali-config/variant-amnesic kali-config/
 
 ./build.sh --distribution kali-rolling --variant amnesic --verbose
+```
 
+## Kernel command-line recommendations
 
-**All files are ready** in the local scaffold.  
-As soon as the GitHub connector has write permission, I can push the entire tree in one commit.
+Add to the live boot entry:
+
+```
+init_on_free=1 page_poison=1 slab_nomerge pti=on
+```
+
+These strengthen the kernel’s own free-page poisoning.
+
+## Structure
+
+```
+ShadowKali-Tails/
+├── README.md
+├── LICENSE
+└── kali-config/
+    └── variant-amnesic/
+        ├── package-lists/
+        │   └── kali.list.chroot
+        ├── hooks/
+        │   └── live/
+        │       ├── 00-prepare.chroot
+        │       ├── 01-apparmor.chroot
+        │       ├── 02-tor-proxy.chroot
+        │       ├── 03-amnesic.chroot
+        │       ├── 04-memory-wipe.chroot
+        │       ├── 05-onion-service.chroot
+        │       └── 06-persistent-onion.chroot
+        └── includes.chroot/
+            ├── etc/
+            │   ├── tor/torrc
+            │   ├── nftables.conf
+            │   ├── sysctl.d/99-amnesic.conf
+            │   ├── systemd/
+            │   │   ├── journald.conf.d/volatile.conf
+            │   │   └── system/
+            │   │       ├── memory-wipe.service
+            │   │       └── shadowkali-onion-persist.service
+            │   └── NetworkManager/conf.d/99-tor.conf
+            └── usr/local/sbin/
+                ├── wipe-memory
+                └── shadowkali-onion-persist
+```
+
+## Notes
+
+- Onion service private keys are generated in RAM by default and disappear on shutdown.
+- Optional encrypted persistence can keep a stable `.onion` address.
+- Only v3 onion services are used.
+- Unix socket backend preferred for the onion service to avoid local TCP leaks.
+- Fail-closed nftables: only the Tor daemon may talk to the clearnet.
+
+Built from the official Kali live-build scripts.

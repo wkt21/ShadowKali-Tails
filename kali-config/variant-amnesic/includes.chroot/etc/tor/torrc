@@ -1,0 +1,40 @@
+# Amnesic Kali – forced Tor
+User debian-tor
+DataDirectory /var/lib/tor
+PidFile /run/tor/tor.pid
+
+SocksPort 9050 IsolateClientAddr IsolateClientProtocol IsolateDestAddr IsolateDestPort
+SocksPolicy accept 127.0.0.1
+SocksPolicy reject *
+
+# Transparent proxy
+TransPort 127.0.0.1:9040 IsolateClientAddr IsolateClientProtocol IsolateDestAddr IsolateDestPort
+DNSPort 127.0.0.1:5353
+AutomapHostsOnResolve 1
+VirtualAddrNetworkIPv4 10.192.0.0/10
+VirtualAddrNetworkIPv6 [FC00::]/7
+
+# Prefer faster circuits, still safe
+CircuitBuildTimeout 10
+LearnCircuitBuildTimeout 0
+MaxCircuitDirtiness 600
+
+# Disable unnecessary features that can leak
+DisableDebuggerAttachment 1
+SafeLogging 1
+
+############### Onion Service (ShadowKali-Tails) ###############
+
+# Ephemeral onion service – lives only in RAM unless persistence is enabled
+HiddenServiceDir /var/lib/tor/shadowkali_hs/
+HiddenServiceVersion 3
+
+# Map virtual port 80 → local backend
+# Option A (recommended): Unix socket (safest)
+HiddenServicePort 80 unix:/run/tor/shadowkali_hs.sock
+
+# Option B (classic TCP – use only if your application cannot use a socket)
+# HiddenServicePort 80 127.0.0.1:8080
+
+# Optional: also expose SSH or another service
+# HiddenServicePort 22 127.0.0.1:22

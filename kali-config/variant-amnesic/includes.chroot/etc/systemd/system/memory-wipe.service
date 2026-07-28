@@ -1,0 +1,14 @@
+[Unit]
+Description=Wipe free memory on shutdown
+DefaultDependencies=no
+Before=shutdown.target reboot.target halt.target
+RequiresMountsFor=/
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/wipe-memory
+TimeoutStartSec=90
+RemainAfterExit=yes
+
+[Install]
+WantedBy=shutdown.target reboot.target halt.target

@@ -1,0 +1,36 @@
+# Core
+kali-linux-core
+kali-desktop-xfce
+live-boot
+live-config
+live-tools
+kali-archive-keyring
+
+# Tor + anonymity
+tor
+torsocks
+obfs4proxy
+apt-transport-tor
+
+# MAC + sandbox
+apparmor
+apparmor-profiles
+apparmor-profiles-extra
+apparmor-utils
+firejail
+
+# Firewall
+nftables
+
+# Amnesic / anti-forensic helpers
+secure-delete
+haveged
+rng-tools5
+
+# Minimal tools
+firefox-esr
+curl
+wget
+vim-nox
+tmux
+htop

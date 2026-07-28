@@ -1,0 +1,12 @@
+[Unit]
+Description=ShadowKali Onion Service Persistence Helper
+After=local-fs.target
+Before=tor.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/shadowkali-onion-persist
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
