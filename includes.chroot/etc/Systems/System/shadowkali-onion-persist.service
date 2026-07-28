@@ -1,0 +1,13 @@
+[Unit]
+Description=ShadowKali Onion Service persistent key setup
+Before=tor.service
+After=local-fs.target
+DefaultDependencies=no
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/shadowkali-onion-persist
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
