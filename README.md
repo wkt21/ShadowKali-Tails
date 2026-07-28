@@ -1,5 +1,8 @@
 # ShadowKali-Tails
 
+<img width="1536" height="1024" alt="IMG_5570" src="https://github.com/user-attachments/assets/a25b623a-4931-4331-a56a-3fea06fd2b78" />
+
+
 **Tails-inspired amnesic Kali Linux live system**  
 *by Wkt12 / wkt21*
 
