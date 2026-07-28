@@ -2,9 +2,9 @@
 set -euo pipefail
 
 # Enable AppArmor
-systemctl enable apparmor || true
+systemctl enable apparmor 2>/dev/null || true
 
-# Ensure profiles are loaded (live systems may need extra care)
-if command -v aa-enforce >/dev/null; then
-    aa-enforce /etc/apparmor.d/* || true
+# Best-effort enforce of available profiles
+if command -v aa-enforce >/dev/null 2>&1; then
+    aa-enforce /etc/apparmor.d/* 2>/dev/null || true
 fi

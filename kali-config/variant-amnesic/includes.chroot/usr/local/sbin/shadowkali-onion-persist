@@ -1,26 +1,32 @@
 #!/bin/bash
+# ShadowKali-Tails – make onion service keys persistent when encrypted
+# persistence is available; otherwise keep them ephemeral (RAM-only).
 set -euo pipefail
 
 HS_DIR="/var/lib/tor/shadowkali_hs"
-PERSIST_ROOT=""                          # will be detected
+PERSIST_ROOT=""
 PERSIST_HS=""
 
-# Common places Kali / live-boot mounts persistence
-for candidate in \
-    /lib/live/mount/persistence/* \
-    /run/live/persistence/* \
-    /live/persistence/* \
+# Locations where live-boot / Kali typically mounts persistence
+candidates=(
+    /lib/live/mount/persistence/*
+    /run/live/persistence/*
+    /live/persistence/*
     /mnt/persistence
-do
-    if [ -d "$candidate" ] && [ -f "$candidate/persistence.conf" ] || mountpoint -q "$candidate" 2>/dev/null; then
-        PERSIST_ROOT="$candidate"
-        break
-    fi
+)
+
+for candidate in "${candidates[@]}"; do
+    # Expand globs safely
+    for path in $candidate; do
+        if [ -d "$path" ] && { [ -f "$path/persistence.conf" ] || mountpoint -q "$path" 2>/dev/null; }; then
+            PERSIST_ROOT="$path"
+            break 2
+        fi
+    done
 done
 
-# Also check the classic union overlay location
+# Fallback: classic union overlay
 if [ -z "$PERSIST_ROOT" ] && [ -d /run/live/overlay ]; then
-    # When using "/ union" the changes live under the overlay
     PERSIST_ROOT="/run/live/overlay"
 fi
 
@@ -32,20 +38,23 @@ if [ -n "$PERSIST_ROOT" ]; then
     chown -R debian-tor:debian-tor "$PERSIST_HS"
     chmod 700 "$PERSIST_HS"
 
-    # If the ephemeral dir already has keys and the persistent one is empty,
-    # migrate them once (first time persistence is enabled)
+    # First-time migration: copy existing keys if persistent dir is empty
     if [ -f "$HS_DIR/hostname" ] && [ ! -f "$PERSIST_HS/hostname" ]; then
         echo "[ShadowKali] Migrating existing onion keys to persistence"
         cp -a "$HS_DIR/." "$PERSIST_HS/"
     fi
 
-    # Replace the ephemeral directory with a bind-mount / symlink to the persistent one
+    # Replace the ephemeral directory with a bind-mount (preferred) or symlink
     rm -rf "$HS_DIR"
     mkdir -p "$HS_DIR"
-    mount --bind "$PERSIST_HS" "$HS_DIR" || ln -sfn "$PERSIST_HS" "$HS_DIR"
+    if mount --bind "$PERSIST_HS" "$HS_DIR" 2>/dev/null; then
+        :
+    else
+        ln -sfn "$PERSIST_HS" "$HS_DIR"
+    fi
 
-    chown -R debian-tor:debian-tor "$HS_DIR"
-    chmod 700 "$HS_DIR"
+    chown -R debian-tor:debian-tor "$HS_DIR" 2>/dev/null || true
+    chmod 700 "$HS_DIR" 2>/dev/null || true
 else
     echo "[ShadowKali] No persistence → onion service will be ephemeral"
     mkdir -p "$HS_DIR"

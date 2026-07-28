@@ -4,17 +4,14 @@ set -euo pipefail
 HS_DIR="/var/lib/tor/shadowkali_hs"
 SOCK_DIR="/run/tor"
 
-# Create directories
 mkdir -p "$HS_DIR"
 mkdir -p "$SOCK_DIR"
 
-# Strict ownership & permissions (critical)
+# Strict ownership & permissions (critical for Tor)
 chown -R debian-tor:debian-tor "$HS_DIR"
 chmod 700 "$HS_DIR"
 
-# Ensure /run/tor is usable by debian-tor
 chown debian-tor:debian-tor "$SOCK_DIR"
 chmod 755 "$SOCK_DIR"
 
-# Make sure Tor can write the socket
-# (the actual socket file is created by Tor itself)
+# The actual Unix socket is created by Tor itself at runtime

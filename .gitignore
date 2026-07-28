@@ -1,0 +1,18 @@
+# Build artifacts
+*.iso
+*.img
+*.log
+images/
+cache/
+.tmp/
+
+# Editor / OS
+.DS_Store
+*~
+*.swp
+.idea/
+.vscode/
+
+# Local overrides
+local/
+*.local

@@ -1,24 +1,32 @@
 #!/bin/bash
 # Best-effort free-memory wipe on shutdown (cold-boot mitigation)
+# Combined with kernel command-line: init_on_free=1 page_poison=1
 set -euo pipefail
-echo "Starting free memory wipe…"
+
+echo "[ShadowKali] Starting free memory wipe…"
 sync
-echo 3 > /proc/sys/vm/drop_caches || true
-# Use secure-delete if available, otherwise a simple dd loop
-if command -v sdmem >/dev/null; then
-    sdmem -llv
+echo 3 > /proc/sys/vm/drop_caches 2>/dev/null || true
+
+if command -v sdmem >/dev/null 2>&1; then
+    # secure-delete package (preferred)
+    sdmem -llv || true
 else
-    # Allocate and free large chunks of RAM (kernel poisoning helps)
+    # Fallback: allocate as much RAM as possible so the kernel poisons pages
+    # (requires python3 which is normally present on Kali)
     python3 -c '
-import os, mmap, resource
-resource.setrlimit(resource.RLIMIT_AS, (resource.RLIM_INFINITY, resource.RLIM_INFINITY))
+import mmap, resource, sys
+try:
+    resource.setrlimit(resource.RLIMIT_AS, (resource.RLIM_INFINITY, resource.RLIM_INFINITY))
+except Exception:
+    pass
 chunks = []
 try:
     while True:
-        chunks.append(mmap.mmap(-1, 64*1024*1024))
-except:
+        chunks.append(mmap.mmap(-1, 64 * 1024 * 1024))
+except Exception:
     pass
-print("Allocated", len(chunks)*64, "MiB")
-' || true
+print("[ShadowKali] Allocated approx", len(chunks) * 64, "MiB for wipe")
+' 2>/dev/null || true
 fi
-echo "Memory wipe pass finished."
+
+echo "[ShadowKali] Memory wipe pass finished."

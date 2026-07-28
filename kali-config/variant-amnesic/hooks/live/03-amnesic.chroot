@@ -2,20 +2,25 @@
 set -euo pipefail
 
 # Disable swap permanently
-swapoff -a || true
-systemctl mask swap.target || true
+swapoff -a 2>/dev/null || true
+systemctl mask swap.target 2>/dev/null || true
 
 # Force key directories onto tmpfs (live-boot already helps; this hardens it)
-cat >> /etc/fstab <<EOF
+if ! grep -q 'tmpfs /tmp' /etc/fstab 2>/dev/null; then
+    cat >> /etc/fstab << 'EOF'
 tmpfs /tmp     tmpfs defaults,noatime,mode=1777,size=20% 0 0
 tmpfs /var/tmp tmpfs defaults,noatime,mode=1777,size=10% 0 0
 tmpfs /var/log tmpfs defaults,noatime,mode=0755,size=50M 0 0
 EOF
+fi
 
-# Kill history
-echo 'HISTFILE=/dev/null' > /etc/profile.d/00-amnesic.sh
-echo 'unset HISTFILE'    >> /etc/profile.d/00-amnesic.sh
+# Kill shell history
+cat > /etc/profile.d/00-amnesic.sh << 'EOF'
+HISTFILE=/dev/null
+unset HISTFILE
+export HISTFILE=/dev/null
+EOF
 chmod 644 /etc/profile.d/00-amnesic.sh
 
-# Disable crash dumps, core files, etc.
+# Disable core dumps
 echo 'kernel.core_pattern=|/bin/false' > /etc/sysctl.d/99-nocore.conf

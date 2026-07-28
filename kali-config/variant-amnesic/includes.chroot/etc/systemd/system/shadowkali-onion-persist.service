@@ -1,5 +1,6 @@
 [Unit]
 Description=ShadowKali Onion Service Persistence Helper
+DefaultDependencies=no
 After=local-fs.target
 Before=tor.service
 

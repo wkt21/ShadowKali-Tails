@@ -1,6 +1,5 @@
 #!/bin/bash
 set -euo pipefail
 
-# Install the persistence helper script and enable the service
 chmod 755 /usr/local/sbin/shadowkali-onion-persist
-systemctl enable shadowkali-onion-persist.service || true
+systemctl enable shadowkali-onion-persist.service

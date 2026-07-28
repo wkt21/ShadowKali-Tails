@@ -1,17 +1,19 @@
 #!/bin/bash
 set -euo pipefail
 
-# Make sure debian-tor UID is correct (Kali currently uses 106)
+# Resolve real debian-tor UID (Kali/Debian normally uses 106)
 TOR_UID=$(id -u debian-tor 2>/dev/null || echo 106)
-sed -i "s/define tor_uid = .*/define tor_uid = $TOR_UID/" /etc/nftables.conf
+sed -i "s/define tor_uid *= *.*/define tor_uid = $TOR_UID/" /etc/nftables.conf
 
 chmod 644 /etc/nftables.conf
+
+# Enable services
 systemctl enable nftables
 systemctl enable tor
 
-# Prevent NetworkManager / resolvconf from overwriting DNS
+# Prevent NetworkManager from managing DNS (we force Tor DNSPort)
 mkdir -p /etc/NetworkManager/conf.d
-cat > /etc/NetworkManager/conf.d/99-tor.conf <<EOF
+cat > /etc/NetworkManager/conf.d/99-tor.conf << 'EOF'
 [main]
 dns=none
 EOF

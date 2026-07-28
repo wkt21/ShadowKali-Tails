@@ -1,5 +1,5 @@
 [Unit]
-Description=Wipe free memory on shutdown
+Description=Wipe free memory on shutdown (cold-boot mitigation)
 DefaultDependencies=no
 Before=shutdown.target reboot.target halt.target
 RequiresMountsFor=/
